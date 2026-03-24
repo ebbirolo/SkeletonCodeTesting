@@ -4,7 +4,7 @@
 #developed in the Python 3.9 programming environment
 #Version 2
 
-#done
+#test12
 
 import random
 
@@ -46,13 +46,6 @@ def Main():
             NumberOfStages = int(input("Enter number of stages to advance by: "))
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
-        elif Choice == "9":
-            choice_1 = input("Are you sure you want to quit? (y/n): ")
-            if choice_1 == "y":
-                print("end program")
-            elif choice_1 == "n":
-                print("keep going")
-                Choice = "0"
     input()
 
 def DisplayMenu():
@@ -69,6 +62,11 @@ def DisplayMenu():
 def GetChoice():
     Choice = input()
     return Choice
+
+    #this is a test
+    #can this be seen easily
+    #FEEDBACK
+
 
 def GetCellReference():
     print()
@@ -333,6 +331,9 @@ class Ant(Entity):
         self._FoodCapacity = 0
         self._TypeOfAnt = ""
 
+    def GetStages(self):
+        return self._Stages
+
     def GetFoodCapacity(self):
         return self._FoodCapacity
 
@@ -470,7 +471,13 @@ class Nest(Entity):
                         self._NumberOfQueens += 1
                     else:
                         Ants.append(WorkerAnt(self._Row, self._Column, self._Row, self._Column))
+        for A in Ants:
+            if A.GetStages() == 14 and A.GetTypeOfAnt() == "worker":
+                print(f"Ant died of old age")
+                Ants.remove(A)
+
         return Nests, Ants, Pheromones
+
 
 class Pheromone(Entity):
     def __init__(self, Row, Column, BelongsToAnt, InitialStrength, Decay):
