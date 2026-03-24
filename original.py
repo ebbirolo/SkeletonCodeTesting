@@ -471,13 +471,12 @@ class Nest(Entity):
                         self._NumberOfQueens += 1
                     else:
                         Ants.append(WorkerAnt(self._Row, self._Column, self._Row, self._Column))
-        for A in Ants:
-            if A.GetStages() == 14 and A.GetTypeOfAnt() == "worker":
-                print(f"Ant died of old age")
-                Ants.remove(A)
+        for i in range(len(Ants)-1,-1,-1):
+            if (Ants[i].GetStages()) > 14 and Ants[i].GetTypeOfAnt() == "worker":
+                Ants.pop(i)
+                print("Ant has died of old age")
 
         return Nests, Ants, Pheromones
-
 
 class Pheromone(Entity):
     def __init__(self, Row, Column, BelongsToAnt, InitialStrength, Decay):
