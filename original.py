@@ -4,7 +4,7 @@
 #developed in the Python 3.9 programming environment
 #Version 2
 
-#test12
+#done
 
 import random
 
@@ -46,6 +46,13 @@ def Main():
             NumberOfStages = int(input("Enter number of stages to advance by: "))
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
+        elif Choice == "9":
+            choice_1 = input("Are you sure you want to quit? (y/n): ")
+            if choice_1 == "y":
+                print("end program")
+            elif choice_1 == "n":
+                print("keep going")
+                Choice = "0"
     input()
 
 def DisplayMenu():
@@ -62,11 +69,6 @@ def DisplayMenu():
 def GetChoice():
     Choice = input()
     return Choice
-
-    #this is a test
-    #can this be seen easily
-    #FEEDBACK
-
 
 def GetCellReference():
     print()
