@@ -1,5 +1,3 @@
-# SkeletonCodeTesting
-
 # Ant Simulator #
 
 ## Introduction ##
