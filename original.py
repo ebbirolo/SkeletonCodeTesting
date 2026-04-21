@@ -21,8 +21,12 @@ def Main():
     ThisSimulation = Simulation(SimulationParameters)
     Choice = ""
     while Choice != "9":
-        DisplayMenu()
-        Choice = GetChoice()
+        if ThisSimulation.HasSimEnded():
+            print(f"simulation has ended. Reason:{ThisSimulation.GetEndReason()}")
+            Choice = "9"
+        else:
+            DisplayMenu()
+            Choice = GetChoice()
         if Choice == "1":
             print(ThisSimulation.GetDetails())
         elif Choice == "2":
@@ -290,16 +294,13 @@ class Simulation():
         #check if sim should end
         #check for no ants
         if len(self._Ants) == 0:
-            print("no ants")
             self._SimulationEnded = True
             self._EndReason = "no_ants"
         # check for no food
         food_total = 0
-
         for cell in self._Grid:
-            food_total += N.GetFoodLevel()
+            food_total += cell.GetAmountOfFood()
         if food_total == 0:
-            print("no food")
             self._SimulationEnded = True
             self._EndReason = "no_food"
 
