@@ -88,6 +88,10 @@ class Simulation():
         self._Ants = []
         self._Pheromones = []
         self._Grid = []
+
+        self._SimulationEnded= False
+        self._EndReason = "not_yet"
+
         Row = 0
         Column = 0
         for Row in range(1, self._NumberOfRows + 1):
@@ -114,6 +118,12 @@ class Simulation():
                     if N.GetRow() == Row and N.GetColumn() == Column:
                         Allowed = False
             self.AddFoodToCell(Row, Column,500)
+
+    def HasSimEnded(self):
+        return self._SimulationEnded
+
+    def GetEndReason(self):
+        return self._EndReason
 
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
@@ -276,6 +286,23 @@ class Simulation():
                     A.ChooseCellToMoveTo(self.__GetIndicesOfNeighbours(A.GetRow(), A.GetColumn()), self.__GetIndexOfNeighbourWithStrongestPheromone(A.GetRow(), A.GetColumn()))
             for N in self._Nests:
                 self._Nests, self._Ants, self._Pheromones = N.AdvanceStage(self._Nests, self._Ants, self._Pheromones)
+
+        #check if sim should end
+        #check for no ants
+        if len(self._Ants) == 0:
+            print("no ants")
+            self._SimulationEnded = True
+            self._EndReason = "no_ants"
+        # check for no food
+        food_total = 0
+
+        for cell in self._Grid:
+            food_total += N.GetFoodLevel()
+        if food_total == 0:
+            print("no food")
+            self._SimulationEnded = True
+            self._EndReason = "no_food"
+
 
 class Entity():
     def __init__(self, StartRow, StartColumn):
