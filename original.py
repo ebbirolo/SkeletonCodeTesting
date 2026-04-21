@@ -4,7 +4,6 @@
 #developed in the Python 3.9 programming environment
 #Version 2
 
-#test12
 
 import random
 
