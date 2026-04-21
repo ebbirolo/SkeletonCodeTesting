@@ -278,6 +278,17 @@ class Simulation():
             for N in self._Nests:
                 self._Nests, self._Ants, self._Pheromones = N.AdvanceStage(self._Nests, self._Ants, self._Pheromones)
 
+        for ant in self._Ants:
+            if ant.GetTypeOfAnt() == "flying":
+                print("flying ant exists ")
+                break #not count already born ant twice
+            if ant.GetTypeOfAnt() == "flying":
+                if FlyingAnt.GetAntAge(self) == 3:
+                    x = random.randint(0,10)
+                    y = random.randint(0,10)
+                    Simulation.SetUpANestAt(self, x, y)
+                    print(f"nest at ({x},{y})")
+
 class Entity():
     def __init__(self, StartRow, StartColumn):
         self._Row = StartRow
@@ -391,6 +402,9 @@ class WorkerAnt(Ant):
         self._TypeOfAnt = "worker"
         self._FoodCapacity = 30
 
+    def AdvanceStage(self, Nests, Ants, Pheromones):
+        self._Stages += 1
+
     def GetDetails(self):
         return f"{super().GetDetails()}, carrying {self._AmountOfFoodCarried} food, home nest is at {self._NestRow} {self._NestColumn}"
 
@@ -410,6 +424,21 @@ class WorkerAnt(Ant):
         else:
             IndexToUse = ListOfNeighbours.index(IndexOfNeighbourWithStrongestPheromone)
             self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+
+class FlyingAnt(Ant):
+    def __init__(self, StartRow, StartColumn, NestInRow, NestInColumn):
+        super().__init__(StartRow, StartColumn, NestInRow, NestInColumn)
+        self._TypeOfAnt = "flying"
+        self._FoodCapacity = 5
+
+    def AdvanceStage(self, Nests, Ants, Pheromones):
+        if self._Stages == 3:
+            print("fly")
+        else:
+            self._Stages += 1
+
+    def GetAntAge(self):
+        return self._Stages
 
 class Nest(Entity):
     _NextNestID = 1
@@ -468,6 +497,12 @@ class Nest(Entity):
                         self._NumberOfQueens += 1
                     else:
                         Ants.append(WorkerAnt(self._Row, self._Column, self._Row, self._Column))
+
+        #20% chance to make flying ant
+        RandNo = random.randint(0, 99)
+        if RandNo <= 80:
+            Ants.append(FlyingAnt(self._Row, self._Column, self._Row, self._Column))
+
         return Nests, Ants, Pheromones
 
 class Pheromone(Entity):
