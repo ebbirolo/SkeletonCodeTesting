@@ -252,6 +252,10 @@ class Simulation():
 
     def AdvanceStage(self, NumberOfStages):
         for Count in range(1, NumberOfStages + 1):
+            for Cell in self._Grid:
+                if Cell.GetAmountOfFood() > 0:
+                    Decay = int(Cell.GetAmountOfFood() * 0.1)
+                    Cell.UpdateFoodInCell(-Decay)
             PheromonesToDelete = []
             for P in self._Pheromones:
                 P.AdvanceStage(self._Nests, self._Ants, self._Pheromones)
@@ -316,6 +320,8 @@ class Cell(Entity):
 
     def UpdateFoodInCell(self, Change):
         self._AmountOfFood += Change
+        if self._AmountOfFood < 0:
+            self._AmountOfFood = 0
 
 class Ant(Entity):
     _NextAntID = 1
