@@ -10,7 +10,7 @@ import random
 
 def Main():
     SimulationParameters = []
-    SimNo = input("Enter simulation number: ")
+    SimNo = GetSimChoice()
     if SimNo == "1":
         SimulationParameters = [1, 5, 5, 500, 3, 5, 1000, 50]
     elif SimNo == "2":
@@ -31,13 +31,13 @@ def Main():
             StartColumn = 0
             EndRow = 0
             EndColumn = 0
-            StartRow, StartColumn = GetCellReference()
-            EndRow, EndColumn = GetCellReference()
+            StartRow, StartColumn = GetCellReference(ThisSimulation)
+            EndRow, EndColumn = GetCellReference(ThisSimulation)
             print(ThisSimulation.GetAreaDetails(StartRow, StartColumn, EndRow, EndColumn))
         elif Choice == "3":
             Row = 0
             Column = 0
-            Row, Column = GetCellReference()
+            Row, Column = GetCellReference(ThisSimulation)
             print(ThisSimulation.GetCellDetails(Row, Column))
         elif Choice == "4":
             ThisSimulation.AdvanceStage(1)
@@ -47,6 +47,27 @@ def Main():
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
     input()
+
+def DisplaySimulationChoices():
+    print("\n--- Simulation Choices ---")
+    print(f"1. Sim 1: 1 nest, 5x5 grid, 500 food/nest, 3 food cells, 5 ants, pheromone 1000, decay 50")
+    print(f"2. Sim 2: 1 nest, 5x5 grid, 500 food/nest, 3 food cells, 5 ants, pheromone 1000, decay 100")
+    print(f"3. Sim 3: 1 nest, 10x10 grid, 500 food/nest, 3 food cells, 9 ants, pheromone 1000, decay 25")
+    print(f"4. Sim 4: 2 nests, 10x10 grid, 500 food/nest, 3 food cells, 6 ants, pheromone 1000, decay 25")
+    print()
+
+def GetSimChoice():
+    DisplaySimulationChoices()
+    while True:
+        try:
+            Choice = input("Enter simulation number: ")
+            ChoiceInt = int(Choice)
+            if ChoiceInt < 1 or ChoiceInt > 4:
+                print("Invalid choice. Please enter a number between 1 and 4.")
+            else:
+                return Choice
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
 
 def DisplayMenu():
     print()
@@ -60,18 +81,42 @@ def DisplayMenu():
     print("> ", end='')
 
 def GetChoice():
-    Choice = input()
-    return Choice
-
-    #this is a test
-    #can this be seen easily
-    #FEEDBACK
+    ValidOptions = ["1", "2", "3", "4", "5", "9"]
+    while True:
+        try:
+            Choice = input()
+            int(Choice)  # check it's a number
+            if Choice not in ValidOptions:
+                print("Invalid choice. Please enter a number from the menu.")
+                print("> ", end='')
+            else:
+                return Choice
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
+            print("> ", end='')
 
 
 def GetCellReference():
+    MaxRows, MaxColumns = ThisSimulation.GetGridSize()
     print()
-    Row = int(input("Enter row number: "))
-    Column = int(input("Enter column number: "))
+    Row = None
+    while Row is None:
+        try:
+            Row = int(input("Enter row number: "))
+            if Row < 1 or Row > MaxRows:
+                print(f"Out of range. Please enter a row between 1 and {MaxRows}.")
+                Row = None
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
+    Column = None
+    while Column is None:
+        try:
+            Column = int(input("Enter column number: "))
+            if Column < 1 or Column > MaxColumns:
+                print(f"Out of range. Please enter a column between 1 and {MaxColumns}.")
+                Column = None
+        except ValueError:
+            print("Invalid input. Please enter a valid integer.")
     print()
     return Row, Column
 
@@ -105,6 +150,7 @@ class Simulation():
                     if N.GetRow() == Row and N.GetColumn() == Column:
                         Allowed = False
             self.SetUpANestAt(Row, Column)
+        FoodCellsPlaced = []
         for Count in range(1, self._StartingNumberOfFoodCells + 1):
             Allowed = False
             while Allowed == False:
@@ -114,7 +160,11 @@ class Simulation():
                 for N in self._Nests:
                     if N.GetRow() == Row and N.GetColumn() == Column:
                         Allowed = False
-            self.AddFoodToCell(Row, Column,500)
+                for F in FoodCellsPlaced:
+                    if F[0] == Row and F[1] == Column:
+                        Allowed = False
+            FoodCellsPlaced.append((Row, Column))
+            self.AddFoodToCell(Row, Column, 500)
 
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
@@ -127,6 +177,9 @@ class Simulation():
 
     def __GetIndex(self, Row, Column):
         return (Row - 1) * self._NumberOfColumns + Column - 1
+
+    def GetGridSize(self):
+        return self._NumberOfRows, self._NumberOfColumns
 
     def __GetIndicesOfNeighbours(self, Row, Column):
         ListOfNeighbours = []
