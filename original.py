@@ -119,7 +119,8 @@ class Simulation():
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
         self._Ants.append(QueenAnt(Row, Column, Row, Column))
-        for Worker in range(2, self._StartingAntsInNest + 1):
+        self._Ants.append(ForagerAnt(Row, Column, Row, Column))
+        for Worker in range(3, self._StartingAntsInNest + 1):
             self._Ants.append(WorkerAnt(Row, Column, Row, Column))
 
     def AddFoodToCell(self, Row, Column, Quantity):
@@ -148,6 +149,16 @@ class Simulation():
                 IndexOfStrongestPheromone = Index
                 StrongestPheromone = self.GetStrongestPheromoneInCell(self._Grid[Index])
         return IndexOfStrongestPheromone
+
+    #copied from __GetIndexOfNeighbourWithStrongestPheromone
+    def __GetIndexOfNeighbourWithStrongestSmell(self, Row, Column):
+        StrongestSmell = 0
+        IndexOfStrongestSmell = -1
+        for Index in self.__GetIndicesOfNeighbours(Row, Column):
+            if Index != -1 and self._Grid[Index].GetAmountOfSmell() > StrongestSmell:
+                IndexOfStrongestSmell = Index
+                StrongestSmell = self._Grid[Index].GetAmountOfSmell()
+        return IndexOfStrongestSmell
 
     def GetNestInCell(self, C):
         for N in self._Nests:
@@ -274,7 +285,7 @@ class Simulation():
                 else:
                     if A.GetFoodCarried() > 0:
                         self.UpdateAntsPheromoneInCell(A)
-                    A.ChooseCellToMoveTo(self.__GetIndicesOfNeighbours(A.GetRow(), A.GetColumn()), self.__GetIndexOfNeighbourWithStrongestPheromone(A.GetRow(), A.GetColumn()))
+                    A.ChooseCellToMoveTo(self.__GetIndicesOfNeighbours(A.GetRow(), A.GetColumn()), self.__GetIndexOfNeighbourWithStrongestPheromone(A.GetRow(), A.GetColumn()), self.__GetIndexOfNeighbourWithStrongestSmell(A.GetRow(), A.GetColumn()))
             for N in self._Nests:
                 self._Nests, self._Ants, self._Pheromones = N.AdvanceStage(self._Nests, self._Ants, self._Pheromones)
 
@@ -309,6 +320,9 @@ class Cell(Entity):
 
     def GetAmountOfFood(self):
         return self._AmountOfFood
+
+    def GetAmountOfSmell(self):
+        return self._AmountOfFood * 10
 
     def GetDetails(self):
         Details = f"{super().GetDetails()}{self._AmountOfFood} food present" + "\n\n"
@@ -365,7 +379,7 @@ class Ant(Entity):
                 Chosen = True
         return RNo
 
-    def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone):
+    def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone, IndexOfNeighbourWithStrongestSmell):
         pass
 
     def GetFoodCarried(self):
@@ -385,6 +399,60 @@ class QueenAnt(Ant):
         super().__init__(StartRow, StartColumn, NestInRow, NestInColumn)
         self._TypeOfAnt = "queen"
 
+class ForagerAnt(Ant):
+    def __init__(self, StartRow, StartColumn, NestInRow, NestInColumn):
+        super().__init__(StartRow, StartColumn, NestInRow, NestInColumn)
+        self._TypeOfAnt = "forager"
+        self._FoodCapacity = 30
+
+    def GetDetails(self):
+        return f"{super().GetDetails()}, carrying {self._AmountOfFoodCarried} food, home nest is at {self._NestRow} {self._NestColumn}"
+
+    def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone, IndexOfNeighbourWithStrongestSmell):
+        if self._AmountOfFoodCarried > 0:
+            print("forager bringing food back to nest")
+            # -x
+            if self._Row > self._NestRow:
+                self._Row -= 1
+            # +x
+            elif self._Row < self._NestRow:
+                self._Row += 1
+            # -y
+            if self._Column > self._NestColumn:
+                self._Column -= 1
+            # +y
+            elif self._Column < self._NestColumn:
+                self._Column += 1
+        elif IndexOfNeighbourWithStrongestSmell == -1:
+            print("forager does not smell food")
+            IndexToUse = self._ChooseRandomNeighbour(ListOfNeighbours)
+            self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+        else:
+            print("forager smells food")
+            IndexToUse = ListOfNeighbours.index(IndexOfNeighbourWithStrongestSmell)
+            self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+
+            SmellDirection = ""
+            Current = self._Row, self._Column
+            SmellBearing = (self._ChangeCell(IndexToUse, self._Row, self._Column))
+            x = SmellBearing[0] - Current[0]
+            y = SmellBearing[1] - Current[1]
+
+            #print(x,y)
+
+            if y>0:
+                SmellDirection = SmellDirection + "North "
+            elif y<0:
+                SmellDirection = SmellDirection + "South "
+            if x > 0:
+                SmellDirection = SmellDirection + "East "
+            elif x < 0:
+                SmellDirection = SmellDirection + "West "
+
+            print(f"coming from the {SmellDirection}")
+            #resets cell direction
+            SmellDirection = ""
+
 class WorkerAnt(Ant):
     def __init__(self, StartRow, StartColumn, NestInRow, NestInColumn):
         super().__init__(StartRow, StartColumn, NestInRow, NestInColumn)
@@ -394,7 +462,7 @@ class WorkerAnt(Ant):
     def GetDetails(self):
         return f"{super().GetDetails()}, carrying {self._AmountOfFoodCarried} food, home nest is at {self._NestRow} {self._NestColumn}"
 
-    def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone):
+    def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone, IndexOfNeighbourWithStrongestSmell):
         if self._AmountOfFoodCarried > 0:
             if self._Row > self._NestRow:
                 self._Row -= 1
