@@ -89,6 +89,10 @@ class Simulation():
         self._Ants = []
         self._Pheromones = []
         self._Grid = []
+
+        self.Bird = Bird(random.randint(1,self._NumberOfRows))
+        #Bird
+
         Row = 0
         Column = 0
         for Row in range(1, self._NumberOfRows + 1):
@@ -201,6 +205,10 @@ class Simulation():
                 AmountOfFood = TempCell.GetAmountOfFood()
                 if AmountOfFood > 0:
                     Details += f"| {AmountOfFood} food |  "
+
+                if self._Bird.GetRow() == Row and self._Bird.GetColumn() == Column:
+                    pass
+
                 Details += "\n"
         return Details
 
@@ -316,6 +324,10 @@ class Cell(Entity):
 
     def UpdateFoodInCell(self, Change):
         self._AmountOfFood += Change
+
+class Bird(Entity):
+    def __init__(self, StartRow, StartColumn):
+        super().__init__(StartRow, StartColumn)
 
 class Ant(Entity):
     _NextAntID = 1
