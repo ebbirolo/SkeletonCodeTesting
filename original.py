@@ -119,6 +119,7 @@ class Simulation():
 
     def RemovePheromonesFromCell(self, C):
         for p in range(len(self._Pheromones)-1,-1,-1): # reverse for loop
+            C.SetCinnamon()
             pheromone = self._Pheromones[p]
             if pheromone.InSameLocation(C):
                 self._Pheromones.pop(p)
@@ -229,6 +230,9 @@ class Simulation():
                 if AmountOfFood > 0:
                     Details += f"| {AmountOfFood} food |  "
                 Details += "\n"
+                if Cell.GetCinnamon() == True:
+                    Details += f"| Cinnamon = {Cell.GetCinnamon()}  |  "
+                Details += "\n"
         return Details
 
     def AddFoodToNest(self, Food, Row, Column):
@@ -313,9 +317,17 @@ class Cell(Entity):
     def __init__(self, StartRow, StartColumn):
         super().__init__(StartRow, StartColumn)
         self._AmountOfFood = 0
+        self._Cinnamon = False
 
     def GetAmountOfFood(self):
         return self._AmountOfFood
+
+    def SetCinnamon(self):
+        self._Cinnamon = True
+
+    def GetCinnamon(self):
+        return self._Cinnamon
+
 
     def GetDetails(self):
         Details = f"{super().GetDetails()}{self._AmountOfFood} food present" + "\n\n"
