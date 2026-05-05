@@ -46,6 +46,11 @@ def Main():
             NumberOfStages = int(input("Enter number of stages to advance by: "))
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
+        elif Choice == "6":
+            (Row, Column) = GetCellReference()
+            print(f"predator added to {(Row, Column)}")
+            ThisSimulation.AddPredatorToCell(Row, Column)
+
     input()
 
 def DisplayMenu():
@@ -55,6 +60,7 @@ def DisplayMenu():
     print("3. Inspect cell")
     print("4. Advance one stage")
     print("5. Advance X stages")
+    print("6. Add a predator")
     print("9. Quit")
     print()
     print("> ", end='')
@@ -89,6 +95,7 @@ class Simulation():
         self._Ants = []
         self._Pheromones = []
         self._Grid = []
+        self._Predators = []
         Row = 0
         Column = 0
         for Row in range(1, self._NumberOfRows + 1):
@@ -116,11 +123,16 @@ class Simulation():
                         Allowed = False
             self.AddFoodToCell(Row, Column,500)
 
+    def AddPredatorToCell(self, Row, Column):
+        self._Predators.append(Predator(Row, Column))
+        print(f"pred at {(Row, Column)}")
+
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
         self._Ants.append(QueenAnt(Row, Column, Row, Column))
         for Worker in range(2, self._StartingAntsInNest + 1):
             self._Ants.append(WorkerAnt(Row, Column, Row, Column))
+            self._Ants.append(SoldierAnt(Row, Column, Row, Column))
 
     def AddFoodToCell(self, Row, Column, Quantity):
         self._Grid[self.__GetIndex(Row, Column)].UpdateFoodInCell(Quantity)
@@ -317,6 +329,15 @@ class Cell(Entity):
     def UpdateFoodInCell(self, Change):
         self._AmountOfFood += Change
 
+class Predator(Entity):
+    def __init__(self, StartRow, StartColumn):
+        super().__init__(StartRow, StartColumn)
+        self._Location = ""
+
+    def GetPredCell(self):
+        self.Location = (self.GetRow(),self.GetColumn())
+        return self.Location
+
 class Ant(Entity):
     _NextAntID = 1
 
@@ -384,6 +405,43 @@ class QueenAnt(Ant):
     def __init__(self, StartRow, StartColumn, NestInRow, NestInColumn):
         super().__init__(StartRow, StartColumn, NestInRow, NestInColumn)
         self._TypeOfAnt = "queen"
+
+class SoldierAnt(Ant):
+    def __init__(self, StartRow, StartColumn, NestInRow, NestInColumn):
+        super().__init__(StartRow, StartColumn, NestInRow, NestInColumn)
+        self._TypeOfAnt = "soldier"
+        self._FoodCapacity = 5
+        self._State = ""
+
+    def GetState(self):
+        return self._State
+
+    def SetState(self):
+        #if pred near
+        self._State = "engaging"
+        #else
+        self._State = "patrolling"
+
+    def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone):
+        if DistanceToPred() == 1:
+            pass
+        else:
+            if self._AmountOfFoodCarried > 0:
+                if self._Row > self._NestRow:
+                    self._Row -= 1
+                elif self._Row < self._NestRow:
+                    self._Row += 1
+                if self._Column > self._NestColumn:
+                    self._Column -= 1
+                elif self._Column < self._NestColumn:
+                    self._Column += 1
+            elif IndexOfNeighbourWithStrongestPheromone == -1:
+                IndexToUse = self._ChooseRandomNeighbour(ListOfNeighbours)
+                self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+            else:
+                IndexToUse = ListOfNeighbours.index(IndexOfNeighbourWithStrongestPheromone)
+                self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+
 
 class WorkerAnt(Ant):
     def __init__(self, StartRow, StartColumn, NestInRow, NestInColumn):
