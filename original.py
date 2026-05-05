@@ -4,8 +4,6 @@
 #developed in the Python 3.9 programming environment
 #Version 2
 
-#test12
-
 import random
 
 def Main():
@@ -46,6 +44,8 @@ def Main():
             NumberOfStages = int(input("Enter number of stages to advance by: "))
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
+        elif Choice == "6":
+            ThisSimulation.RemovePheromonesFromCell(GetCellReference())
     input()
 
 def DisplayMenu():
@@ -55,6 +55,7 @@ def DisplayMenu():
     print("3. Inspect cell")
     print("4. Advance one stage")
     print("5. Advance X stages")
+    print("6. Add cinnamon")
     print("9. Quit")
     print()
     print("> ", end='')
@@ -115,6 +116,12 @@ class Simulation():
                     if N.GetRow() == Row and N.GetColumn() == Column:
                         Allowed = False
             self.AddFoodToCell(Row, Column,500)
+
+    def RemovePheromonesFromCell(self, C):
+        for p in range(len(self._Pheromones)-1,-1,-1): # reverse for loop
+            pheromone = self._Pheromones[p]
+            if pheromone.InSameLocation(C):
+                self._Pheromones.pop(p)
 
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
@@ -358,6 +365,7 @@ class Ant(Entity):
         return RowToChange, ColumnToChange
 
     def _ChooseRandomNeighbour(self, ListOfNeighbours):
+        RNo = ""
         Chosen = False
         while Chosen == False:
             RNo = random.randint(0, len(ListOfNeighbours) - 1)
