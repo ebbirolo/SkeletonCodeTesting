@@ -46,6 +46,10 @@ def Main():
             NumberOfStages = int(input("Enter number of stages to advance by: "))
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
+        elif Choice == "6":
+            print(ThisSimulation.GetDetails())
+            ThisSimulation.DisplayPheromoneHeatMap()
+
     input()
 
 def DisplayMenu():
@@ -55,6 +59,7 @@ def DisplayMenu():
     print("3. Inspect cell")
     print("4. Advance one stage")
     print("5. Advance X stages")
+    print("6. Display pheromone heat map")
     print("9. Quit")
     print()
     print("> ", end='')
@@ -116,6 +121,17 @@ class Simulation():
                         Allowed = False
             self.AddFoodToCell(Row, Column,500)
 
+    def DisplayPheromoneHeatMap(self):
+        output = ""
+        for x in range(self._NumberOfRows):
+            for y in range(self._NumberOfColumns):
+                cell = self._Grid[self.__GetIndex(x,y)]
+                pheromonesInCell = self.GetTotalPheromoneInCell(cell)
+                output += f"| {pheromonesInCell}  |"
+            output += "\n"
+        print(output)
+
+
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
         self._Ants.append(QueenAnt(Row, Column, Row, Column))
@@ -175,6 +191,14 @@ class Simulation():
             if P.InSameLocation(C):
                 Count += 1
         return Count
+
+
+    def GetTotalPheromoneInCell(self, C):
+        Total = 0
+        for P in self._Pheromones:
+            if P.InSameLocation(C):
+                Total = P.GetStrength()
+        return Total
 
     def GetStrongestPheromoneInCell(self, C):
         Strongest = 0
