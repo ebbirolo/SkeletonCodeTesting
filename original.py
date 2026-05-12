@@ -125,12 +125,11 @@ class Simulation():
 
     def AddPredatorToCell(self, Row, Column):
         self._Predators.append(Predator(Row, Column))
-        print(f"pred at {(Row, Column)}")
 
     def SetUpANestAt(self, Row, Column):
         self._Nests.append(Nest(Row, Column, self._StartingFoodInNest))
         self._Ants.append(QueenAnt(Row, Column, Row, Column))
-        for Worker in range(2, self._StartingAntsInNest + 1):
+        for Worker in range(2, (self._StartingAntsInNest + 1)//2 + 1):
             self._Ants.append(WorkerAnt(Row, Column, Row, Column))
             self._Ants.append(SoldierAnt(Row, Column, Row, Column))
 
@@ -419,11 +418,16 @@ class SoldierAnt(Ant):
     def SetState(self):
         #if pred near
         self._State = "engaging"
+        print("engaging")
         #else
         self._State = "patrolling"
+        print("patrolling")
+
+    def DistanceToPred(self):
+        pass
 
     def ChooseCellToMoveTo(self, ListOfNeighbours, IndexOfNeighbourWithStrongestPheromone):
-        if DistanceToPred() == 1:
+        if self.DistanceToPred() == 1:
             pass
         else:
             if self._AmountOfFoodCarried > 0:
@@ -441,6 +445,7 @@ class SoldierAnt(Ant):
             else:
                 IndexToUse = ListOfNeighbours.index(IndexOfNeighbourWithStrongestPheromone)
                 self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+
 
 
 class WorkerAnt(Ant):
@@ -500,6 +505,7 @@ class Nest(Entity):
                 else:
                     Count += 2
                     AntsInNestCount += 1
+
         self.ChangeFood(-int(Count))
         if self._FoodLevel == 0 and AntsInNestCount > 0:
             AntsToCull += 1
