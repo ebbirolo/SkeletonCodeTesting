@@ -46,6 +46,15 @@ def Main():
             NumberOfStages = int(input("Enter number of stages to advance by: "))
             ThisSimulation.AdvanceStage(NumberOfStages)
             print(f"Simulation moved on {NumberOfStages} stages" + "\n")
+        elif Choice == "6":
+            #choose ant to move
+            #choose cell to move it to
+            Row = 0
+            Column = 0
+            Row, Column = GetCellReference()
+            WorkerAnt.SetNewLocation(ThisSimulation, Row, Column)
+            pass
+
     input()
 
 def DisplayMenu():
@@ -55,6 +64,7 @@ def DisplayMenu():
     print("3. Inspect cell")
     print("4. Advance one stage")
     print("5. Advance X stages")
+    print("6. Move ant")
     print("9. Quit")
     print()
     print("> ", end='')
@@ -62,11 +72,6 @@ def DisplayMenu():
 def GetChoice():
     Choice = input()
     return Choice
-
-    #this is a test
-    #can this be seen easily
-    #FEEDBACK
-
 
 def GetCellReference():
     print()
@@ -410,6 +415,14 @@ class WorkerAnt(Ant):
         else:
             IndexToUse = ListOfNeighbours.index(IndexOfNeighbourWithStrongestPheromone)
             self._Row, self._Column = self._ChangeCell(IndexToUse, self._Row, self._Column)
+
+    def SetNewLocation(self, Row, Column):
+        Row = 0
+        Column = 0
+        Row, Column = GetCellReference()
+        self._Row = 1
+        self._Column = 1
+        return Row, Column
 
 class Nest(Entity):
     _NextNestID = 1
